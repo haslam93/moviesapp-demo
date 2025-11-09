@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import MovieCard from './MovieCard.jsx';
 import './MovieGrid.css';
 
-export const MovieGrid = ({ items, emptyLabel }) => {
+export const MovieGrid = ({ items, emptyLabel, onToggleFavorite }) => {
   if (!items.length) {
     return (
       <div className="movie-grid__empty">
@@ -16,6 +16,7 @@ export const MovieGrid = ({ items, emptyLabel }) => {
       {items.map((movie) => (
         <MovieCard
           key={movie.id ?? movie.externalId ?? movie.title}
+          id={movie.id}
           title={movie.title}
           posterUrl={movie.posterUrl}
           year={movie.year}
@@ -23,6 +24,8 @@ export const MovieGrid = ({ items, emptyLabel }) => {
           genres={movie.genres}
           imdbUrl={movie.imdbUrl}
           category={movie.category}
+          isFavorite={movie.isFavorite}
+          onToggleFavorite={onToggleFavorite}
         />
       ))}
     </div>
@@ -31,7 +34,8 @@ export const MovieGrid = ({ items, emptyLabel }) => {
 
 MovieGrid.propTypes = {
   items: PropTypes.arrayOf(PropTypes.object),
-  emptyLabel: PropTypes.string
+  emptyLabel: PropTypes.string,
+  onToggleFavorite: PropTypes.func
 };
 
 MovieGrid.defaultProps = {

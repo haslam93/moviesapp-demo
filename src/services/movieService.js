@@ -2,11 +2,16 @@ import { fetchFeaturedMovies, fetchMoviesByCategory } from '../clients/movieApiC
 import { movieCategories } from '../config/categories.js';
 import { config } from '../config/index.js';
 import {
+  addFavorite,
+  countFavorites,
   countMovies,
   ensureCategories,
+  findFavorites,
   findMovieById,
   findMovies,
+  isFavorite,
   listCategories,
+  removeFavorite,
   storeMoviesForCategory
 } from '../data/movieRepository.js';
 
@@ -49,10 +54,23 @@ export const warmUpCatalog = async () => {
   return { seeded: true, count: finalCount, imported: totalImported };
 };
 
-export const getMovies = async ({ category, searchTerm, page = 1, pageSize = 24 } = {}) => {
+export const getMovies = async ({ category, searchTerm, page = 1, pageSize = 24, favoritesOnly = false } = {}) => {
   const safePage = Math.max(1, page);
   const limit = pageSize;
   const offset = (safePage - 1) * limit;
+  
+  if (favoritesOnly) {
+    const total = countFavorites();
+    const items = findFavorites({ limit, offset });
+    return {
+      items,
+      total,
+      page: safePage,
+      pageSize: limit,
+      totalPages: Math.max(1, Math.ceil(total / limit))
+    };
+  }
+
   const total = countMovies({ category, searchTerm });
 
   if (total === 0) {
@@ -61,8 +79,13 @@ export const getMovies = async ({ category, searchTerm, page = 1, pageSize = 24 
   }
 
   const items = findMovies({ category, searchTerm, limit, offset });
+  const itemsWithFavorites = items.map((item) => ({
+    ...item,
+    isFavorite: isFavorite(item.id)
+  }));
+  
   return {
-    items,
+    items: itemsWithFavorites,
     total,
     page: safePage,
     pageSize: limit,
@@ -77,4 +100,13 @@ export const getCategories = () => listCategories();
 export const getFeatured = async () => {
   const items = await fetchFeaturedMovies(movieCategories.slice(0, 5));
   return items.slice(0, 12);
+};
+
+export const toggleFavorite = (movieId, shouldFavorite) => {
+  if (shouldFavorite) {
+    addFavorite(movieId);
+  } else {
+    removeFavorite(movieId);
+  }
+  return { success: true, isFavorite: shouldFavorite };
 };

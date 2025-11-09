@@ -4,7 +4,7 @@ import './MovieCard.css';
 
 const fallbackPoster = 'https://via.placeholder.com/300x450.png?text=Cinema+Demo';
 
-export const MovieCard = ({ title, posterUrl, year, rating, genres, imdbUrl, category }) => {
+export const MovieCard = ({ id, title, posterUrl, year, rating, genres, imdbUrl, category, isFavorite, onToggleFavorite }) => {
   const normalizedRating = typeof rating === 'number' ? rating : Number.parseFloat(rating);
   const theme = resolveCategoryTheme(category);
 
@@ -17,10 +17,25 @@ export const MovieCard = ({ title, posterUrl, year, rating, genres, imdbUrl, cat
     '--card-muted': theme.muted
   };
 
+  const handleFavoriteClick = (e) => {
+    e.preventDefault();
+    if (onToggleFavorite) {
+      onToggleFavorite(id, !isFavorite);
+    }
+  };
+
   return (
     <article className="movie-card" aria-label={title} style={cardStyle}>
       <div className="movie-card__poster">
         <img src={posterUrl || fallbackPoster} alt={`${title} poster`} loading="lazy" />
+        <button
+          className={`movie-card__favorite ${isFavorite ? 'is-favorite' : ''}`}
+          onClick={handleFavoriteClick}
+          aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+          title={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+        >
+          {isFavorite ? '⭐' : '☆'}
+        </button>
         {Number.isFinite(normalizedRating) ? (
           <span className="movie-card__rating">⭐ {normalizedRating.toFixed(1)}</span>
         ) : null}
@@ -42,17 +57,21 @@ export const MovieCard = ({ title, posterUrl, year, rating, genres, imdbUrl, cat
 };
 
 MovieCard.propTypes = {
+  id: PropTypes.number.isRequired,
   title: PropTypes.string.isRequired,
   posterUrl: PropTypes.string,
   year: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   rating: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   genres: PropTypes.string,
   imdbUrl: PropTypes.string,
-  category: PropTypes.string
+  category: PropTypes.string,
+  isFavorite: PropTypes.bool,
+  onToggleFavorite: PropTypes.func
 };
 
 MovieCard.defaultProps = {
-  category: ''
+  category: '',
+  isFavorite: false
 };
 
 export default MovieCard;
