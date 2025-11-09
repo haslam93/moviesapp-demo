@@ -7,7 +7,7 @@ Cinemademoapp is a demo-ready, multi-layer movie explorer built with an Express 
 - **Layered Node.js backend** – Express routing layer, controller/service/data separation, and a SQLite persistence layer powered by `better-sqlite3`.
 - **External data ingestion** – Fetches curated genres from SampleAPIs and persists them locally for fast browsing.
 - **React cinematic UI** – Vite + React 19 app with featured spotlights, search, filters, and responsive movie grids with thumbnails.
-- **Zero-config demo** – No third-party API keys required. Everything runs locally with two `npm run dev` commands.
+- **Zero-config demo** – No third-party API keys required. Pre-seeded database included for instant startup with two `npm run dev` commands.
 
 ## Project structure
 
@@ -41,7 +41,7 @@ npm install
 npm run dev
 ```
 
-The API boots on `http://localhost:4000`. Key endpoints:
+The API boots on `http://localhost:4000` with a **pre-seeded database** for instant demo readiness. Key endpoints:
 
 - `GET /api/movies` – Paginated movie catalog (`category`, `search`, `page`, `pageSize` query params)
 - `GET /api/movies/categories` – Available genres

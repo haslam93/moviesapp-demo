@@ -2,9 +2,12 @@ node_modules/
 client/node_modules/
 .env
 .env.*
-data/*.db
-data/*.sqlite
-data/*.db-journal
+# Keep the main database for demo purposes, but exclude temp files
+# data/*.db  
+# data/*.sqlite
+# Exclude SQLite temporary files but keep the main database
+data/*.db-shm
+data/*.db-wal
 *.log
 .DS_Store
 coverage/
