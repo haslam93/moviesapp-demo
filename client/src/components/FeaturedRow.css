@@ -1,0 +1,26 @@
+.featured-row {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin: 40px 0 32px;
+}
+
+.featured-row__header h2 {
+  margin: 0;
+  font-size: 2rem;
+  background: var(--accent-gradient, linear-gradient(135deg, #ff4d6d, #7bdff2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.featured-row__header p {
+  margin: 4px 0 0;
+  color: var(--muted-foreground, rgba(255, 255, 255, 0.7));
+}
+
+.featured-row__list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 20px;
+}
