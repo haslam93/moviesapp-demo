@@ -55,6 +55,20 @@ const buildDatabase = () => {
     END;
   `);
 
+  database.exec(`
+    CREATE TABLE IF NOT EXISTS favorites (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      movie_id INTEGER NOT NULL,
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE(movie_id),
+      FOREIGN KEY(movie_id) REFERENCES movies(id) ON DELETE CASCADE
+    );
+  `);
+
+  database.exec(`
+    CREATE INDEX IF NOT EXISTS idx_favorites_movie_id ON favorites(movie_id);
+  `);
+
   return database;
 };
 

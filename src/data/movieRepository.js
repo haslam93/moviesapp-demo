@@ -208,3 +208,58 @@ export const clearAllData = () => {
   db.exec('DELETE FROM movies;');
   db.exec('DELETE FROM sqlite_sequence WHERE name IN (\'movies\', \'categories\');');
 };
+
+export const addFavorite = (movieId) => {
+  const db = getDb();
+  const stmt = db.prepare(`
+    INSERT INTO favorites (movie_id)
+    VALUES (@movieId)
+    ON CONFLICT(movie_id) DO NOTHING;
+  `);
+  stmt.run({ movieId });
+};
+
+export const removeFavorite = (movieId) => {
+  const db = getDb();
+  const stmt = db.prepare('DELETE FROM favorites WHERE movie_id = @movieId;');
+  stmt.run({ movieId });
+};
+
+export const isFavorite = (movieId) => {
+  const db = getDb();
+  const stmt = db.prepare('SELECT 1 FROM favorites WHERE movie_id = @movieId LIMIT 1;');
+  const result = stmt.get({ movieId });
+  return !!result;
+};
+
+export const findFavorites = ({ limit = 24, offset = 0 } = {}) => {
+  const db = getDb();
+  const stmt = db.prepare(`
+    SELECT m.id,
+           m.external_id as externalId,
+           m.title,
+           m.description,
+           m.poster_url as posterUrl,
+           m.imdb_url as imdbUrl,
+           m.year,
+           m.rating,
+           m.runtime_minutes as runtimeMinutes,
+           m.genres,
+           c.name as category,
+           c.label as categoryLabel,
+           1 as isFavorite
+    FROM favorites f
+    JOIN movies m ON m.id = f.movie_id
+    JOIN categories c ON c.id = m.category_id
+    ORDER BY f.created_at DESC
+    LIMIT @limit OFFSET @offset;
+  `);
+  return stmt.all({ limit, offset });
+};
+
+export const countFavorites = () => {
+  const db = getDb();
+  const stmt = db.prepare('SELECT COUNT(1) as total FROM favorites;');
+  const result = stmt.get();
+  return result?.total ?? 0;
+};

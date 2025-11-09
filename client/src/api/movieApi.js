@@ -24,18 +24,26 @@ export const fetchCategories = () => requestJson('/movies/categories');
 
 export const fetchFeaturedMovies = () => requestJson('/movies/featured');
 
-export const fetchMovies = ({ category, search, page, pageSize } = {}) => {
+export const fetchMovies = ({ category, search, page, pageSize, favorites } = {}) => {
   const params = new URLSearchParams();
   if (category) params.set('category', category);
   if (search) params.set('search', search);
   if (page) params.set('page', page);
   if (pageSize) params.set('pageSize', pageSize);
+  if (favorites) params.set('favorites', 'true');
   const query = params.toString();
   return requestJson(`/movies${query ? `?${query}` : ''}`);
 };
 
+export const toggleMovieFavorite = (movieId, isFavorite) =>
+  requestJson(`/movies/${movieId}/favorite`, {
+    method: 'POST',
+    body: JSON.stringify({ isFavorite })
+  });
+
 export default {
   fetchCategories,
   fetchFeaturedMovies,
-  fetchMovies
+  fetchMovies,
+  toggleMovieFavorite
 };

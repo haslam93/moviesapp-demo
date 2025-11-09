@@ -44,6 +44,34 @@
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
 }
 
+.movie-card__favorite {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.6);
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 160ms ease;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.movie-card__favorite:hover {
+  background: rgba(0, 0, 0, 0.75);
+  transform: scale(1.1);
+}
+
+.movie-card__favorite.is-favorite {
+  background: rgba(255, 215, 0, 0.2);
+}
+
+.movie-card__favorite.is-favorite:hover {
+  background: rgba(255, 215, 0, 0.3);
+}
+
 .movie-card__content {
   padding: 18px 18px 20px;
   display: flex;

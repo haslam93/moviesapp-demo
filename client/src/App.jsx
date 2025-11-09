@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState } from 'react';
 import {
   fetchCategories,
   fetchFeaturedMovies,
-  fetchMovies
+  fetchMovies,
+  toggleMovieFavorite
 } from './api/movieApi.js';
 import CategoryFilter from './components/CategoryFilter.jsx';
 import FeaturedRow from './components/FeaturedRow.jsx';
@@ -42,6 +43,13 @@ function App() {
 
   const filterOptions = useMemo(() => {
     const allTheme = categoryThemes.default;
+    const favoritesTheme = {
+      ...categoryThemes.default,
+      icon: '⭐',
+      accent: '#ffd700',
+      accentSoft: 'rgba(255, 215, 0, 0.2)',
+      gradient: 'linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(255, 223, 0, 0.05))'
+    };
     return [
       {
         name: '',
@@ -49,14 +57,28 @@ function App() {
         icon: allTheme.icon,
         theme: allTheme
       },
+      {
+        name: 'favorites',
+        label: 'Favorites',
+        icon: favoritesTheme.icon,
+        theme: favoritesTheme
+      },
       ...themedCategories
     ];
   }, [themedCategories]);
 
-  const activeTheme = useMemo(
-    () => resolveCategoryTheme(selectedCategory || undefined),
-    [selectedCategory]
-  );
+  const activeTheme = useMemo(() => {
+    if (selectedCategory === 'favorites') {
+      return {
+        ...categoryThemes.default,
+        icon: '⭐',
+        accent: '#ffd700',
+        accentSoft: 'rgba(255, 215, 0, 0.2)',
+        gradient: 'linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(255, 223, 0, 0.05))'
+      };
+    }
+    return resolveCategoryTheme(selectedCategory || undefined);
+  }, [selectedCategory]);
 
   const themeStyle = useMemo(
     () => ({
@@ -123,11 +145,13 @@ function App() {
       setLoading(true);
       setError('');
       try {
+        const isFavorites = selectedCategory === 'favorites';
         const data = await fetchMovies({
-          category: selectedCategory || undefined,
+          category: isFavorites ? undefined : (selectedCategory || undefined),
           search: debouncedSearch || undefined,
           page,
-          pageSize: MOVIES_PER_PAGE
+          pageSize: MOVIES_PER_PAGE,
+          favorites: isFavorites
         });
         if (!ignore) {
           setMoviesResult({
@@ -160,6 +184,9 @@ function App() {
     if (!selectedCategory) {
       return undefined;
     }
+    if (selectedCategory === 'favorites') {
+      return 'Favorites';
+    }
     return categories.find((category) => category.name === selectedCategory)?.label;
   }, [categories, selectedCategory]);
 
@@ -174,11 +201,29 @@ function App() {
     if (searchInput) {
       return 'Refine your search';
     }
+    if (selectedCategory === 'favorites') {
+      return 'Search is not available for favorites';
+    }
     if (activeCategoryLabel) {
       return `Search ${activeCategoryLabel.toLowerCase()} gems`;
     }
     return 'Search across the full catalog';
-  }, [activeCategoryLabel, searchInput]);
+  }, [activeCategoryLabel, searchInput, selectedCategory]);
+
+  const handleToggleFavorite = async (movieId, isFavorite) => {
+    try {
+      await toggleMovieFavorite(movieId, isFavorite);
+      // Update the local state
+      setMoviesResult((prev) => ({
+        ...prev,
+        items: prev.items.map((item) =>
+          item.id === movieId ? { ...item, isFavorite } : item
+        )
+      }));
+    } catch (err) {
+      console.error('Failed to toggle favorite', err);
+    }
+  };
 
   return (
     <div className="app-shell" style={themeStyle}>
@@ -228,7 +273,11 @@ function App() {
             <span>Loading movies…</span>
           </div>
         ) : (
-          <MovieGrid items={moviesResult.items} />
+          <MovieGrid
+            items={moviesResult.items}
+            onToggleFavorite={handleToggleFavorite}
+            emptyLabel={selectedCategory === 'favorites' ? 'No favorites yet. Star some movies to see them here!' : 'No movies were found for your filters.'}
+          />
         )}
 
         <Pagination
